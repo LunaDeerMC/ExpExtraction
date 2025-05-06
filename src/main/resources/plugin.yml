@@ -1,0 +1,15 @@
+name: ExpExtraction
+version: '${project.version}'
+main: cn.lunadeer.mc.expExtraction.ExpExtraction
+api-version: '1.20'
+folia-supported: true
+permissions:
+  expextraction.extract:
+    description: 使用经验提取
+    default: true
+
+commands:
+  extract:
+    description: 将经验转换为经验瓶
+    permission: expextraction.extract
+    usage: /extract [amount]
