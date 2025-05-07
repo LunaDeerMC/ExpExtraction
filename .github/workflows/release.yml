@@ -36,7 +36,7 @@ jobs:
         uses: "marvinpinto/action-automatic-releases@latest"
         with:
           repo_token: "${{ secrets.GITHUB_TOKEN }}"
-          automatic_release_tag: "${{ steps.build.outputs.TAG }}-release"
+          automatic_release_tag: "${{ steps.build.outputs.TAG }}"
           prerelease: false
           files: |
             staging/*.jar
