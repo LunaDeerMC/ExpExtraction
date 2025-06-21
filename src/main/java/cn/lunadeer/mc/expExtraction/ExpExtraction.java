@@ -40,6 +40,7 @@ public final class ExpExtraction extends JavaPlugin implements CommandExecutor, 
         new bStatsMetrics(this, 26205);
         Objects.requireNonNull(this.getCommand("extract")).setExecutor(this);
         getServer().getPluginManager().registerEvents(this, this);
+        new bStatsMetrics(this, 26231);
     }
 
     @Override
