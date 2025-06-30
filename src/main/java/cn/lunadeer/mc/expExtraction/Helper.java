@@ -46,16 +46,7 @@ public class Helper {
      * @return 玩家当前的总经验值
      */
     public static int getExperienceOf(Player player) {
-        int level = player.getLevel();
-        float experience = player.getExp();
-        int totalExp = 0;
-        int levelNeeded = 7;
-        for (int i = 0; i < level; i++) {
-            totalExp += levelNeeded;
-            levelNeeded += 2;
-        }
-        totalExp += (int) (experience * levelNeeded);
-        return totalExp;
+        return player.calculateTotalExperiencePoints();
     }
 
     /**
@@ -66,15 +57,7 @@ public class Helper {
      * @param totalExp 需要设置的总经验值
      */
     public static void setExperienceOf(Player player, int totalExp) {
-        int level = 0;
-        int levelNeeded = 7;
-        while (totalExp >= levelNeeded) {
-            totalExp -= levelNeeded;
-            level++;
-            levelNeeded += 2;
-        }
-        player.setLevel(level);
-        player.setExp((float) totalExp / levelNeeded);
+        player.setExperienceLevelAndProgress(totalExp);
     }
 
     public static String formatString(String str, Object... args) {
