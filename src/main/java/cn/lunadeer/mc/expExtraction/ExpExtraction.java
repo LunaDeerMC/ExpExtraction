@@ -23,6 +23,7 @@ import java.io.File;
 import java.util.Objects;
 
 import static cn.lunadeer.mc.expExtraction.Helper.generateBottle;
+import static cn.lunadeer.mc.expExtraction.Helper.generateBottles;
 import static cn.lunadeer.mc.expExtraction.Helper.getExperienceOf;
 
 public final class ExpExtraction extends JavaPlugin implements CommandExecutor, Listener {
@@ -77,7 +78,33 @@ public final class ExpExtraction extends JavaPlugin implements CommandExecutor, 
             getLogger().warning("只有玩家可以使用此命令");
             return true;
         }
-        // Handle command execution
+        if (args.length > 2) {
+            sender.sendMessage(Notification.error("用法：/extract [每瓶经验值] [数量]"));
+            return true;
+        }
+        int requestedCount = 1;
+        if (args.length > 1) {
+            try {
+                requestedCount = Integer.parseInt(args[1]);
+            } catch (NumberFormatException e) {
+                sender.sendMessage(Notification.error("请输入有效的经验瓶数量"));
+                return true;
+            }
+            if (requestedCount <= 0) {
+                sender.sendMessage(Notification.error("经验瓶数量必须为正整数"));
+                return true;
+            }
+        }
+        if (Configuration.commandExtraction.maximumBottles <= 0) {
+            sender.sendMessage(Notification.error("经验瓶数量上限配置无效，请联系管理员"));
+            return true;
+        }
+        if (requestedCount > Configuration.commandExtraction.maximumBottles) {
+            sender.sendMessage(Notification.warn("每次最多生成 {0} 个经验瓶", Configuration.commandExtraction.maximumBottles));
+            requestedCount = Configuration.commandExtraction.maximumBottles;
+        }
+
+        int experience = getExperienceOf(player);
         int amount;
         if (args.length > 0) {
             try {
@@ -90,12 +117,12 @@ public final class ExpExtraction extends JavaPlugin implements CommandExecutor, 
                 sender.sendMessage(Notification.error("请输入一个非负整数"));
                 return true;
             }
-            if (amount > getExperienceOf(player)) {
+            if (amount > experience) {
                 sender.sendMessage(Notification.error("你没有足够的经验值"));
                 return true;
             }
         } else {
-            amount = getExperienceOf(player);
+            amount = experience;
         }
         if (amount == 0) {
             sender.sendMessage(Notification.error("你没有足够的经验值"));
@@ -105,8 +132,20 @@ public final class ExpExtraction extends JavaPlugin implements CommandExecutor, 
             sender.sendMessage(Notification.warn("每个附魔瓶最多只能容纳 {0} 点经验值", Configuration.commandExtraction.maximum));
             amount = Configuration.commandExtraction.maximum;
         }
-        generateBottle(player, amount);
-        player.sendMessage(Notification.info("成功提取 {0} 点经验值到经验瓶", amount));
+        if (amount <= 0) {
+            sender.sendMessage(Notification.error("经验瓶最大容量配置无效，请联系管理员"));
+            return true;
+        }
+        int actualCount = Math.min(requestedCount, experience / amount);
+        if (actualCount == 0) {
+            sender.sendMessage(Notification.error("你没有足够的经验值"));
+            return true;
+        }
+        generateBottles(player, amount, actualCount);
+        if (actualCount < requestedCount) {
+            player.sendMessage(Notification.warn("经验不足，仅生成 {0} 个完整经验瓶，不会提取不足一瓶的剩余经验", actualCount));
+        }
+        player.sendMessage(Notification.info("成功提取 {0} 点经验值，生成 {1} 个经验瓶（每瓶 {2} 点）", amount * actualCount, actualCount, amount));
         return true;
     }
 

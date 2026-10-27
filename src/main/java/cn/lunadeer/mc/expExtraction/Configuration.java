@@ -13,6 +13,8 @@ public class Configuration extends ConfigurationFile {
         public boolean enable = true;
         @Comments("每个附魔瓶可容纳的最大经验值")
         public int maximum = 2000;
+        @Comments("单次 /extract 指令最多生成的经验瓶数量，避免大量掉落实体造成卡顿")
+        public int maximumBottles = 99;
     }
 
     @Comments({"使用空瓶 Shift+右键 点击附魔台生成经验瓶",})

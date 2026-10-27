@@ -12,4 +12,4 @@ commands:
   extract:
     description: 将经验转换为经验瓶
     permission: expextraction.extract
-    usage: /extract [amount]
+    usage: /extract [amount] [count]

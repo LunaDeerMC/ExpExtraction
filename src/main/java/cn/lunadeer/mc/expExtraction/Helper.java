@@ -20,7 +20,27 @@ public class Helper {
      * @param amount 需要封装进经验瓶的经验值数量
      */
     public static void generateBottle(Player player, int amount) {
-        setExperienceOf(player, getExperienceOf(player) - amount);
+        generateBottles(player, amount, 1);
+    }
+
+    /**
+     * 一次生成多个等额经验瓶。每个经验瓶都包含 amount 点经验，
+     * 总经验值只扣除一次，并尽可能将掉落物合并为堆叠。
+     *
+     * @param player 目标玩家
+     * @param amount 每瓶的经验值
+     * @param count 经验瓶数量
+     */
+    public static void generateBottles(Player player, int amount, int count) {
+        if (amount <= 0 || count <= 0) {
+            throw new IllegalArgumentException("经验值和经验瓶数量必须为正整数");
+        }
+        int available = getExperienceOf(player);
+        long total = (long) amount * count;
+        if (total > available) {
+            throw new IllegalArgumentException("玩家的经验值不足以生成指定数量的经验瓶");
+        }
+        setExperienceOf(player, available - (int) total);
         ItemStack expBottle = new ItemStack(org.bukkit.Material.EXPERIENCE_BOTTLE, 1);
         ItemMeta meta = expBottle.getItemMeta();
         meta.getPersistentDataContainer().set(ExpExtraction.key, PersistentDataType.INTEGER, amount);
@@ -34,7 +54,14 @@ public class Helper {
         meta.setMaxStackSize(99);
         meta.setEnchantmentGlintOverride(true);
         expBottle.setItemMeta(meta);
-        player.getLocation().getWorld().dropItemNaturally(player.getLocation().getBlock().getRelative(BlockFace.UP).getLocation(), expBottle);
+        var dropLocation = player.getLocation().getBlock().getRelative(BlockFace.UP).getLocation();
+        for (int remaining = count; remaining > 0; ) {
+            int stackSize = Math.min(remaining, 99);
+            ItemStack stack = expBottle.clone();
+            stack.setAmount(stackSize);
+            player.getWorld().dropItemNaturally(dropLocation, stack);
+            remaining -= stackSize;
+        }
     }
 
     /**
